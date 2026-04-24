@@ -1,13 +1,16 @@
 """Module for validating survey data."""
 
-from typing import Dict, List
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 
 def validate_required_columns(
-    df: pd.DataFrame, required_columns: List[str]
-) -> Dict[str, bool]:
+    df: pd.DataFrame, required_columns: list[str]
+) -> dict[str, bool]:
     """Check if required columns are present.
 
     Args:
@@ -24,8 +27,8 @@ def validate_required_columns(
 
 
 def validate_data_types(
-    df: pd.DataFrame, expected_types: Dict[str, str]
-) -> Dict[str, bool]:
+    df: pd.DataFrame, expected_types: dict[str, str]
+) -> dict[str, bool]:
     """Check if columns have expected data types.
 
     Args:
@@ -45,7 +48,7 @@ def validate_data_types(
     return validation_results
 
 
-def check_missing_values(df: pd.DataFrame, threshold: float = 0.5) -> Dict[str, float]:
+def check_missing_values(df: pd.DataFrame, threshold: float = 0.5) -> dict[str, float]:
     """Check for columns with high missing value rates.
 
     Args:
@@ -55,6 +58,6 @@ def check_missing_values(df: pd.DataFrame, threshold: float = 0.5) -> Dict[str, 
     Returns:
         Dictionary of columns with missing rates above threshold.
     """
-    missing_rates = df.isnull().mean()
+    missing_rates = df.isna().mean()
     high_missing = missing_rates[missing_rates > threshold]
     return high_missing.to_dict()

@@ -1,10 +1,10 @@
 """Module for mapping different survey schemas to a unified format."""
 
-from typing import Dict, List, Optional
+from __future__ import annotations
 
 import pandas as pd
 
-DEFAULT_COLUMN_MAPPING: Dict[str, List[str]] = {
+DEFAULT_COLUMN_MAPPING: dict[str, list[str]] = {
     "response_id": ["ResponseId", "Response ID", "response_id"],
     "start_date": ["StartDate", "Start Date", "start_date"],
     "end_date": ["EndDate", "End Date", "end_date"],
@@ -23,9 +23,9 @@ DEFAULT_COLUMN_MAPPING: Dict[str, List[str]] = {
 }
 
 
-def _build_column_map(mapping: Dict[str, List[str]]) -> Dict[str, str]:
+def _build_column_map(mapping: dict[str, list[str]]) -> dict[str, str]:
     """Build a source-to-target column map from mapping values."""
-    column_map: Dict[str, str] = {}
+    column_map: dict[str, str] = {}
     for target_name, source_names in mapping.items():
         for source_name in source_names:
             column_map[source_name] = target_name
@@ -34,7 +34,8 @@ def _build_column_map(mapping: Dict[str, List[str]]) -> Dict[str, str]:
 
 def map_columns(
     df: pd.DataFrame,
-    mapping: Optional[Dict[str, List[str]]] = None,
+    mapping: dict[str, list[str]] | None = None,
+    *,
     keep_all_columns: bool = True,
 ) -> pd.DataFrame:
     """Map DataFrame columns to a unified format.

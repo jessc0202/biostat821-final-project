@@ -1,6 +1,4 @@
 """Tests for the loader module."""
-
-import os
 import tempfile
 from pathlib import Path
 
@@ -30,7 +28,7 @@ class TestLoader:
             loaded_df = load_csv(csv_path)
             pd.testing.assert_frame_equal(loaded_df, df)
         finally:
-            os.unlink(csv_path)
+            Path(csv_path).unlink()
 
     def test_load_excel(self):
         """Test loading an Excel file."""
@@ -46,7 +44,7 @@ class TestLoader:
             assert list(loaded_df.columns) == list(df.columns)
             assert len(loaded_df) == len(df)
         finally:
-            os.unlink(excel_path)
+            Path(excel_path).unlink()
 
     def test_load_survey_files_csv(self):
         """Test loading survey CSV files from a directory."""

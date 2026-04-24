@@ -1,9 +1,8 @@
 """Main processor for survey data pipeline."""
 
-from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Union
+from __future__ import annotations
 
-import pandas as pd
+from typing import TYPE_CHECKING, Sequence
 
 from .aligner import align_waves
 from .cleaner import handle_missing_values, remove_duplicates
@@ -11,26 +10,32 @@ from .loader import load_survey_files
 from .mapper import map_columns, standardize_data_types
 from .validator import check_missing_values, validate_required_columns
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    import pandas as pd
+
 
 class SurveyProcessor:
     """Main class for processing survey data."""
 
     def __init__(
         self,
-        default_mapping: Optional[Dict[str, List[str]]] = None,
+        default_mapping: dict[str, list[str]] | None = None,
+        *,
         keep_all_columns: bool = True,
     ):
-        self.combined_data: Optional[pd.DataFrame] = None
+        self.combined_data: pd.DataFrame | None = None
         self.default_mapping = default_mapping
         self.keep_all_columns = keep_all_columns
 
     def process_directory(
         self,
-        directory: Union[str, Path],
-        label: str,
-        extensions: Optional[Sequence[str]] = None,
-        file_patterns: Optional[Sequence[str]] = None,
-    ) -> List[pd.DataFrame]:
+        directory: str | Path,
+        label: str,  # noqa: ARG002
+        extensions: Sequence[str] | None = None,
+        file_patterns: Sequence[str] | None = None,
+    ) -> list[pd.DataFrame]:
         """Process a single directory of survey files.
 
         Args:
@@ -48,32 +53,44 @@ class SurveyProcessor:
             file_patterns=file_patterns,
         )
 
-        processed_dfs: List[pd.DataFrame] = []
-        for df in raw_dfs:
-            df = map_columns(
-                df,
+        processed_dfs: list[pd.DataFrame] = []
+
+        for raw_df in raw_dfs:
+            # 1. Map columns using the provided schema
+            mapped_df = map_columns(
+                raw_df,
                 mapping=self.default_mapping,
                 keep_all_columns=self.keep_all_columns,
             )
-            df = standardize_data_types(df)
-            df = remove_duplicates(
-                df,
-                subset=["response_id"] if "response_id" in df.columns else None,
+
+            # 2. Standardize types (e.g., dates, numeric)
+            standardized_df = standardize_data_types(mapped_df)
+
+            # 3. Remove duplicates based on ID if it exists
+            id_col = (
+                ["response_id"] if "response_id" in standardized_df.columns else None
             )
-            df = handle_missing_values(
-                df,
+            deduplicated_df = remove_duplicates(
+                standardized_df,
+                subset=id_col,
+            )
+
+            # 4. Clean missing values
+            final_df = handle_missing_values(
+                deduplicated_df,
                 strategy="drop",
-                columns=["response_id"] if "response_id" in df.columns else None,
+                columns=id_col,
             )
-            processed_dfs.append(df)
+
+            processed_dfs.append(final_df)
 
         return processed_dfs
 
     def process_data_groups(
         self,
-        data_dirs: Dict[str, Union[str, Path]],
-        extensions: Optional[Sequence[str]] = None,
-        file_patterns: Optional[Sequence[str]] = None,
+        data_dirs: dict[str, str | Path],
+        extensions: Sequence[str] | None = None,
+        file_patterns: Sequence[str] | None = None,
     ) -> pd.DataFrame:
         """Process and combine multiple labeled survey directories.
 
@@ -85,7 +102,7 @@ class SurveyProcessor:
         Returns:
             Combined DataFrame.
         """
-        grouped_dfs: Dict[str, List[pd.DataFrame]] = {}
+        grouped_dfs: dict[str, list[pd.DataFrame]] = {}
         for label, directory in data_dirs.items():
             grouped_dfs[label] = self.process_directory(
                 directory,
@@ -99,10 +116,10 @@ class SurveyProcessor:
 
     def process_all_data(
         self,
-        usa_dir: Union[str, Path],
-        argentina_dir: Union[str, Path],
-        extensions: Optional[Sequence[str]] = None,
-        file_patterns: Optional[Sequence[str]] = None,
+        usa_dir: str | Path,
+        argentina_dir: str | Path,
+        extensions: Sequence[str] | None = None,
+        file_patterns: Sequence[str] | None = None,
     ) -> pd.DataFrame:
         """Process and combine USA and Argentina survey data.
 
@@ -121,7 +138,7 @@ class SurveyProcessor:
             file_patterns=file_patterns,
         )
 
-    def validate_data(self, required_columns: Optional[List[str]] = None) -> Dict:
+    def validate_data(self, required_columns: list[str] | None = None) -> dict:
         """Validate the combined data.
 
         Args:
@@ -131,30 +148,30 @@ class SurveyProcessor:
             Validation results.
         """
         if self.combined_data is None:
-            raise ValueError("No data to validate. Run process_data_groups first.")
+            msg = "No data to validate. Run process_data_groups first."
+            raise ValueError(msg)
 
         if required_columns is None:
             required_columns = ["group", "wave"]
 
-        results = {
+        return {
             "required_columns": validate_required_columns(
                 self.combined_data, required_columns
             ),
             "missing_values": check_missing_values(self.combined_data),
         }
 
-        return results
-
-    def get_summary(self) -> Dict:
+    def get_summary(self) -> dict:
         """Get summary statistics of the data.
 
         Returns:
             Dictionary with summary info.
         """
         if self.combined_data is None:
-            raise ValueError("No data to summarize. Run process_data_groups first.")
+            msg = "No data to summarize. Run process_data_groups first."
+            raise ValueError(msg)
 
-        summary = {
+        return {
             "total_rows": len(self.combined_data),
             "total_columns": len(self.combined_data.columns),
             "waves": (
@@ -169,5 +186,3 @@ class SurveyProcessor:
             ),
             "columns": self.combined_data.columns.tolist(),
         }
-
-        return summary

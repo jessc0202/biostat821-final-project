@@ -1,4 +1,6 @@
-"""Tests for the aligner module."""
+from __future__ import annotations
+
+from typing import ClassVar
 
 import pandas as pd
 
@@ -6,13 +8,10 @@ from dream_survey_processor.aligner import add_wave_column, align_waves
 
 
 class TestAligner:
-    """Test cases for data alignment functions."""
-
-    # Constants for test assertions
     NUM_FILES = 3
     TOTAL_ROWS = 8
-    EXPECTED_WAVES = {1, 2}
-    EXPECTED_GROUPS = {"USA", "Argentina"}
+    EXPECTED_WAVES: ClassVar[set[int]] = {1, 2}
+    EXPECTED_GROUPS: ClassVar[set[str]] = {"USA", "Argentina"}
 
     def test_add_wave_column(self):
         """Test adding wave column to DataFrames."""

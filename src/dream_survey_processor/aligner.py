@@ -1,13 +1,13 @@
 """Module for aligning survey waves across datasets."""
 
-from typing import Dict, List
+from __future__ import annotations
 
 import pandas as pd
 
 
 def add_wave_column(
-    dataframes: List[pd.DataFrame], wave_name: str = "wave"
-) -> List[pd.DataFrame]:
+    dataframes: list[pd.DataFrame], wave_name: str = "wave"
+) -> list[pd.DataFrame]:
     """Add a wave column to each DataFrame.
 
     Args:
@@ -26,7 +26,7 @@ def add_wave_column(
 
 
 def align_waves(
-    grouped_dataframes: Dict[str, List[pd.DataFrame]],
+    grouped_dataframes: dict[str, list[pd.DataFrame]],
     group_name: str = "group",
     wave_name: str = "wave",
 ) -> pd.DataFrame:
@@ -40,7 +40,7 @@ def align_waves(
     Returns:
         Combined DataFrame with aligned waves and group labels.
     """
-    aligned_dfs: List[pd.DataFrame] = []
+    aligned_dfs: list[pd.DataFrame] = []
 
     for label, dataframes in grouped_dataframes.items():
         group_dfs = add_wave_column(dataframes, wave_name=wave_name)
@@ -51,5 +51,4 @@ def align_waves(
     if not aligned_dfs:
         return pd.DataFrame()
 
-    combined_df = pd.concat(aligned_dfs, ignore_index=True, sort=False)
-    return combined_df
+    return pd.concat(aligned_dfs, ignore_index=True, sort=False)

@@ -1,11 +1,14 @@
-"""Module for cleaning survey data."""
+from __future__ import annotations
 
-from typing import List
+from typing import TYPE_CHECKING
 
-import pandas as pd
+if TYPE_CHECKING:
+    import pandas as pd
 
 
-def remove_duplicates(df: pd.DataFrame, subset: List[str] = None) -> pd.DataFrame:
+def remove_duplicates(
+    df: pd.DataFrame, subset: list[str] | None = None
+) -> pd.DataFrame:
     """Remove duplicate rows.
 
     Args:
@@ -19,42 +22,22 @@ def remove_duplicates(df: pd.DataFrame, subset: List[str] = None) -> pd.DataFram
 
 
 def handle_missing_values(
-    df: pd.DataFrame, strategy: str = "drop", columns: List[str] = None
+    df: pd.DataFrame, strategy: str = "drop", columns: list[str] | None = None
 ) -> pd.DataFrame:
-    """Handle missing values.
-
-    Args:
-        df: DataFrame to clean.
-        strategy: Strategy ('drop', 'fill_mean', 'fill_median', 'fill_mode').
-        columns: Columns to apply strategy to.
-
-    Returns:
-        DataFrame with missing values handled.
-    """
-    if columns is None:
-        columns = df.columns
+    """Handle missing values in the DataFrame."""
+    if df is None or df.empty:
+        return df
 
     if strategy == "drop":
         return df.dropna(subset=columns)
-    if strategy == "fill_mean":
-        for col in columns:
-            if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
-                df[col] = df[col].fillna(df[col].mean())
-    elif strategy == "fill_median":
-        for col in columns:
-            if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
-                df[col] = df[col].fillna(df[col].median())
-    elif strategy == "fill_mode":
-        for col in columns:
-            if col in df.columns:
-                df[col] = df[col].fillna(
-                    df[col].mode().iloc[0] if not df[col].mode().empty else df[col]
-                )
+
+    if strategy == "fill":
+        return df.fillna(0)
 
     return df
 
 
-def normalize_text(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+def normalize_text(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     """Normalize text columns (strip, lowercase).
 
     Args:

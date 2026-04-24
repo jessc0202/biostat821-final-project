@@ -1,7 +1,8 @@
-"""Tests for the processor module."""
+from __future__ import annotations
 
 import tempfile
 from pathlib import Path
+from typing import ClassVar
 
 import pandas as pd
 import pytest
@@ -10,16 +11,10 @@ from dream_survey_processor.processor import SurveyProcessor
 
 
 class TestSurveyProcessor:
-    """Test cases for the SurveyProcessor class."""
-
-    # Constants for test assertions
-    NUM_FILES = 2
-    ROWS_PER_FILE = 2
-    TOTAL_ROWS = 8
     EXPECTED_ROWS = 4
     EXPECTED_COLUMNS = 5
-    EXPECTED_WAVES = [1, 2]
-    EXPECTED_GROUPS = {"USA", "Argentina"}
+    EXPECTED_WAVES: ClassVar[list[int]] = [1, 2]
+    EXPECTED_GROUPS: ClassVar[set[str]] = {"USA", "Argentina"}
 
     def test_process_directory(self):
         """Test processing a single labeled directory."""
@@ -31,7 +26,7 @@ class TestSurveyProcessor:
                     "StartDate": ["2024-01-01", "2024-01-02"],
                 }
                 df = pd.DataFrame(data)
-                csv_path = Path(temp_dir) / f"wave_{i+1}.csv"
+                csv_path = Path(temp_dir) / f"wave_{i + 1}.csv"
                 df.to_csv(csv_path, index=False)
 
             processor = SurveyProcessor()
@@ -46,14 +41,15 @@ class TestSurveyProcessor:
 
     def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir, tempfile.TemporaryDirectory() as arg_dir:
+        with tempfile.TemporaryDirectory() as usa_dir, \
+             tempfile.TemporaryDirectory() as arg_dir:
             for i in range(2):
                 data = {
                     "ResponseId": [f"usa_{j}" for j in range(2)],
                     "Demo_Age": [25 + j for j in range(2)],
                 }
                 df = pd.DataFrame(data)
-                csv_path = Path(usa_dir) / f"usa_wave_{i+1}.csv"
+                csv_path = Path(usa_dir) / f"usa_wave_{i + 1}.csv"
                 df.to_csv(csv_path, index=False)
 
             for i in range(2):
@@ -62,7 +58,7 @@ class TestSurveyProcessor:
                     "Demo_Age": [35 + j for j in range(2)],
                 }
                 df = pd.DataFrame(data)
-                excel_path = Path(arg_dir) / f"arg_form_{i+1}.xlsx"
+                excel_path = Path(arg_dir) / f"arg_form_{i + 1}.xlsx"
                 df.to_excel(excel_path, index=False)
 
             processor = SurveyProcessor()

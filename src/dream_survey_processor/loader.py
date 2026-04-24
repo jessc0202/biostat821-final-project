@@ -1,14 +1,16 @@
 """Module for loading survey data from CSV and Excel files."""
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Optional, Sequence, Union
+from typing import Sequence
 
 import pandas as pd
 
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
 
 
-def load_csv(file_path: Union[str, Path]) -> pd.DataFrame:
+def load_csv(file_path: str | Path) -> pd.DataFrame:
     """Load data from a CSV file.
 
     Args:
@@ -20,9 +22,7 @@ def load_csv(file_path: Union[str, Path]) -> pd.DataFrame:
     return pd.read_csv(file_path)
 
 
-def load_excel(
-    file_path: Union[str, Path], sheet_name: Union[int, str] = 0
-) -> pd.DataFrame:
+def load_excel(file_path: str | Path, sheet_name: int | str = 0) -> pd.DataFrame:
     """Load data from an Excel file.
 
     Args:
@@ -36,11 +36,11 @@ def load_excel(
 
 
 def load_survey_files(
-    directory: Union[str, Path],
-    extensions: Optional[Sequence[str]] = None,
-    file_patterns: Optional[Sequence[str]] = None,
-    sheet_name: Union[int, str] = 0,
-) -> List[pd.DataFrame]:
+    directory: str | Path,
+    extensions: Sequence[str] | None = None,
+    file_patterns: Sequence[str] | None = None,
+    sheet_name: int | str = 0,
+) -> list[pd.DataFrame]:
     """Load survey files from a directory.
 
     Args:
@@ -54,19 +54,20 @@ def load_survey_files(
     """
     dir_path = Path(directory)
     if not dir_path.exists() or not dir_path.is_dir():
-        raise ValueError(f"Directory does not exist: {directory}")
+        msg = f"Directory does not exist: {directory}"
+        raise ValueError(msg)
 
     if file_patterns is None:
         if extensions is None:
             extensions = tuple(SUPPORTED_EXTENSIONS)
         file_patterns = [f"*{ext}" for ext in extensions]
 
-    matched_files: List[Path] = []
+    matched_files: list[Path] = []
     for pattern in file_patterns:
         matched_files.extend(sorted(dir_path.glob(pattern)))
 
     unique_files = list(dict.fromkeys(matched_files))
-    dataframes: List[pd.DataFrame] = []
+    dataframes: list[pd.DataFrame] = []
 
     for file_path in unique_files:
         suffix = file_path.suffix.lower()
