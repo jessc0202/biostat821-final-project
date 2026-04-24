@@ -105,6 +105,15 @@ black src/ tests/
 
 The library supports directories containing CSV and Excel files. Each directory is treated as a labeled group and files are processed in sorted order.
 
+## Generative AI Usage
+
+We used ChatGPT to help with:
+- brainstorming the project structure
+- drafting initial test cases
+- debugging Ruff, Black, and pytest errors
+- improving README wording
+
+All code was reviewed, edited, and tested by me before submission.
 ## License
 
 MIT License
