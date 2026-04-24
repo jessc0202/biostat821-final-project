@@ -40,22 +40,20 @@ class TestSurveyProcessor:
                 assert len(df) == self.ROWS_PER_FILE
 
     def test_process_data_groups(self):
-        """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir, \
-             tempfile.TemporaryDirectory() as arg_dir:
-            for i in range(2):
-                data = {
-                    "ResponseId": [f"usa_{j}" for j in range(2)],
-                    "Demo_Age": [25 + j for j in range(2)],
-                    "Demo_Gender": ["M", "F"],
-                    "Dream_Text": ["Dream 1", "Dream 2"],
-                }
-                df = pd.DataFrame(data)
-                csv_path = Path(usa_dir) / f"file_{i}.csv"
-                df.to_csv(csv_path, index=False)
-
-                arg_csv_path = Path(arg_dir) / f"file_{i}.csv"
-                df.to_csv(arg_csv_path, index=False)
+        with tempfile.TemporaryDirectory() as usa_dir:
+            with tempfile.TemporaryDirectory() as arg_dir:
+                for i in range(2):
+                    data = {
+                         "ResponseId": [f"usa_{j}" for j in range(2)],
+                        "Demo_Age": [25 + j for j in range(2)],
+                        "Demo_Gender": ["M", "F"],
+                        "Dream_Text": ["Dream 1", "Dream 2"],
+                        }
+                    df = pd.DataFrame(data)
+                    csv_path = Path(usa_dir) / f"file_{i}.csv"
+                    df.to_csv(csv_path, index=False)
+                    arg_csv_path = Path(arg_dir) / f"file_{i}.csv"
+                    df.to_csv(arg_csv_path, index=False)
 
             processor = SurveyProcessor()
             data_dirs = {"USA": usa_dir, "Argentina": arg_dir}
@@ -68,6 +66,7 @@ class TestSurveyProcessor:
             assert set(combined_df["group"].unique()) == {"USA", "Argentina"}
             assert set(combined_df["wave"].unique()) == set(self.EXPECTED_WAVES)
             assert "response_id" in combined_df.columns
+
     def test_validate_data(self):
         """Test data validation."""
         processor = SurveyProcessor()
