@@ -1,15 +1,17 @@
 """Module for aligning survey waves across datasets."""
 
 import pandas as pd
-from typing import List
+from typing import Dict, List
 
 
-def add_wave_column(dataframes: List[pd.DataFrame], country: str) -> List[pd.DataFrame]:
+def add_wave_column(
+    dataframes: List[pd.DataFrame], wave_name: str = "wave"
+) -> List[pd.DataFrame]:
     """Add a wave column to each DataFrame.
 
     Args:
         dataframes: List of DataFrames for each wave.
-        country: Country name.
+        wave_name: Name of the wave column.
 
     Returns:
         List of DataFrames with wave column added.
@@ -17,35 +19,36 @@ def add_wave_column(dataframes: List[pd.DataFrame], country: str) -> List[pd.Dat
     aligned_dfs = []
     for i, df in enumerate(dataframes):
         df_copy = df.copy()
-        df_copy["wave"] = i + 1  # Waves start from 1
+        df_copy[wave_name] = i + 1  # Waves start from 1
         aligned_dfs.append(df_copy)
     return aligned_dfs
 
 
 def align_waves(
-    usa_dfs: List[pd.DataFrame], argentina_dfs: List[pd.DataFrame]
+    grouped_dataframes: Dict[str, List[pd.DataFrame]],
+    group_name: str = "group",
+    wave_name: str = "wave",
 ) -> pd.DataFrame:
-    """Align waves from USA and Argentina datasets.
+    """Align waves from multiple labeled datasets.
 
     Args:
-        usa_dfs: List of USA DataFrames.
-        argentina_dfs: List of Argentina DataFrames.
+        grouped_dataframes: Mapping from group label to list of DataFrames.
+        group_name: Name of the group label column.
+        wave_name: Name of the wave column.
 
     Returns:
-        Combined DataFrame with aligned waves.
+        Combined DataFrame with aligned waves and group labels.
     """
-    # Add wave and country columns
-    usa_aligned = add_wave_column(usa_dfs, "USA")
-    argentina_aligned = add_wave_column(argentina_dfs, "Argentina")
+    aligned_dfs: List[pd.DataFrame] = []
 
-    # Add country column
-    for df in usa_aligned:
-        df["country"] = "USA"
-    for df in argentina_aligned:
-        df["country"] = "Argentina"
+    for label, dataframes in grouped_dataframes.items():
+        group_dfs = add_wave_column(dataframes, wave_name=wave_name)
+        for df in group_dfs:
+            df[group_name] = label
+        aligned_dfs.extend(group_dfs)
 
-    # Combine all DataFrames
-    all_dfs = usa_aligned + argentina_aligned
-    combined_df = pd.concat(all_dfs, ignore_index=True, sort=False)
+    if not aligned_dfs:
+        return pd.DataFrame()
 
+    combined_df = pd.concat(aligned_dfs, ignore_index=True, sort=False)
     return combined_df

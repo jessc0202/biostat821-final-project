@@ -6,9 +6,9 @@ A Python library for processing messy, multi-wave survey data from different sou
 
 - Load data from CSV and Excel files
 - Map different column schemas to a unified format
-- Align survey waves across datasets
+- Align survey waves across datasets and labeled groups
 - Basic data validation and cleaning
-- Command-line interface for batch processing
+- Command-line interface for general survey directories
 
 ## Installation
 
@@ -29,24 +29,36 @@ pip install -e .[dev]
 from dream_survey_processor import SurveyProcessor
 
 processor = SurveyProcessor()
-combined_data = processor.process_all_data(
-    usa_dir='path/to/usa/data',
-    argentina_dir='path/to/argentina/data'
+combined_data = processor.process_data_groups(
+    {
+        "USA": "path/to/usa/data",
+        "Argentina": "path/to/argentina/data",
+    }
 )
 
-# Validate the data
 validation_results = processor.validate_data()
 print(validation_results)
 
-# Get summary
 summary = processor.get_summary()
 print(summary)
+```
+
+### Customize schema mapping
+
+```python
+custom_mapping = {
+    "response_id": ["ResponseId", "Response ID", "id"],
+    "start_date": ["StartDate", "Start Date"],
+    "age": ["Demo_Age", "Age"],
+}
+
+processor = SurveyProcessor(default_mapping=custom_mapping)
 ```
 
 ### Command Line
 
 ```bash
-dream-survey-processor --usa-dir ./USA --argentina-dir ./Argentina --output processed_data.csv --validate
+dream-survey-processor --input-dir USA=./USA --input-dir Argentina=./Argentina --output processed_data.csv --validate
 ```
 
 ## Project Structure
@@ -91,12 +103,7 @@ black src/ tests/
 
 ## Data Format
 
-The library expects survey data in the following structure:
-
-- **USA**: CSV files in a directory, one per wave (e.g., `Dream Initial Survey_*.csv`, `Dream Follow Up 1_*.csv`, etc.)
-- **Argentina**: Excel files in a directory, one per form (e.g., `DATA FORM 1_*.xlsx`, `DATA FORM 2_*.xlsx`, etc.)
-
-The library maps various column names to unified names and standardizes data types.
+The library supports directories containing CSV and Excel files. Each directory is treated as a labeled group and files are processed in sorted order.
 
 ## License
 

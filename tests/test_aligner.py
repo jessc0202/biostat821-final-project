@@ -1,6 +1,5 @@
 """Tests for the aligner module."""
 
-import pytest
 import pandas as pd
 
 from dream_survey_processor.aligner import add_wave_column, align_waves
@@ -17,7 +16,7 @@ class TestAligner:
             pd.DataFrame({"id": [5, 6], "value": [50, 60]}),
         ]
 
-        aligned_dfs = add_wave_column(dfs, "USA")
+        aligned_dfs = add_wave_column(dfs)
 
         assert len(aligned_dfs) == 3
         for i, df in enumerate(aligned_dfs):
@@ -27,7 +26,7 @@ class TestAligner:
             assert "value" in df.columns
 
     def test_align_waves(self):
-        """Test aligning waves from different countries."""
+        """Test aligning waves from different groups."""
         usa_dfs = [
             pd.DataFrame({"response_id": [1, 2], "age": [25, 30]}),
             pd.DataFrame({"response_id": [1, 2], "age": [26, 31]}),
@@ -37,19 +36,12 @@ class TestAligner:
             pd.DataFrame({"response_id": [3, 4], "age": [36, 41]}),
         ]
 
-        combined_df = align_waves(usa_dfs, argentina_dfs)
+        combined_df = align_waves({"USA": usa_dfs, "Argentina": argentina_dfs})
 
-        # Check total rows
-        assert len(combined_df) == 8  # 2 waves * 2 countries * 2 rows each
-
-        # Check columns
+        assert len(combined_df) == 8
         assert "wave" in combined_df.columns
-        assert "country" in combined_df.columns
+        assert "group" in combined_df.columns
         assert "response_id" in combined_df.columns
         assert "age" in combined_df.columns
-
-        # Check wave values
         assert set(combined_df["wave"].unique()) == {1, 2}
-
-        # Check country values
-        assert set(combined_df["country"].unique()) == {"USA", "Argentina"}
+        assert set(combined_df["group"].unique()) == {"USA", "Argentina"}

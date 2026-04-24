@@ -1,11 +1,10 @@
 """Module for mapping different survey schemas to a unified format."""
 
 import pandas as pd
-from typing import Dict, Any
+from typing import Dict, List, Optional
 
 
-# Define unified column names
-UNIFIED_COLUMNS = {
+DEFAULT_COLUMN_MAPPING: Dict[str, List[str]] = {
     "response_id": ["ResponseId", "Response ID", "response_id"],
     "start_date": ["StartDate", "Start Date", "start_date"],
     "end_date": ["EndDate", "End Date", "end_date"],
@@ -21,38 +20,52 @@ UNIFIED_COLUMNS = {
     "phq_bothered_1": ["PHQ_Bothered_1", "phq_bothered_1"],
     "sleep_quality": ["Sleep_Quality", "sleep_quality"],
     "dream_frequency": ["DreamQ_Frequency", "dream_frequency"],
-    # Continue for all relevant columns
 }
 
 
-def map_columns(df: pd.DataFrame, country: str) -> pd.DataFrame:
-    """Map DataFrame columns to unified format.
+def _build_column_map(mapping: Dict[str, List[str]]) -> Dict[str, str]:
+    """Build a source-to-target column map from mapping values."""
+    column_map: Dict[str, str] = {}
+    for target_name, source_names in mapping.items():
+        for source_name in source_names:
+            column_map[source_name] = target_name
+    return column_map
+
+
+def map_columns(
+    df: pd.DataFrame,
+    mapping: Optional[Dict[str, List[str]]] = None,
+    keep_all_columns: bool = True,
+) -> pd.DataFrame:
+    """Map DataFrame columns to a unified format.
 
     Args:
         df: Input DataFrame.
-        country: Country name for specific mappings.
+        mapping: Optional mapping from target name to possible source names.
+        keep_all_columns: If True, preserve columns that are not mapped.
 
     Returns:
         DataFrame with unified column names.
     """
-    column_mapping = {}
+    if mapping is None:
+        mapping = DEFAULT_COLUMN_MAPPING
 
-    for unified_name, possible_names in UNIFIED_COLUMNS.items():
-        for possible_name in possible_names:
-            if possible_name in df.columns:
-                column_mapping[possible_name] = unified_name
-                break
+    source_to_target = _build_column_map(mapping)
+    rename_map = {
+        column_name: source_to_target[column_name]
+        for column_name in df.columns
+        if column_name in source_to_target
+    }
 
-    # Rename columns
-    df_renamed = df.rename(columns=column_mapping)
+    renamed_df = df.rename(columns=rename_map)
 
-    # Keep only unified columns that exist
-    existing_unified = [
-        col for col in UNIFIED_COLUMNS.keys() if col in df_renamed.columns
+    if keep_all_columns:
+        return renamed_df
+
+    mapped_columns = [
+        source_to_target[col] for col in df.columns if col in source_to_target
     ]
-    df_unified = df_renamed[existing_unified]
-
-    return df_unified
+    return renamed_df[mapped_columns]
 
 
 def standardize_data_types(df: pd.DataFrame) -> pd.DataFrame:
@@ -64,7 +77,6 @@ def standardize_data_types(df: pd.DataFrame) -> pd.DataFrame:
     Returns:
         DataFrame with standardized data types.
     """
-    # Example standardizations
     if "age" in df.columns:
         df["age"] = pd.to_numeric(df["age"], errors="coerce")
     if "duration" in df.columns:
