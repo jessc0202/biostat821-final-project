@@ -44,8 +44,7 @@ class TestSurveyProcessor:
 
     def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir, \
-             tempfile.TemporaryDirectory() as arg_dir:
+        with tempfile.TemporaryDirectory() as usa_dir, tempfile.TemporaryDirectory() as arg_dir:  # noqa: E501
             for i in range(2):
                 data = {
                     "ResponseId": [f"usa_{j}" for j in range(2)],
@@ -98,10 +97,10 @@ class TestSurveyProcessor:
         """Test getting data summary."""
         processor = SurveyProcessor()
         data = {
-             "response_id": [1, 2, 3, 4],
+            "response_id": [1, 2, 3, 4],
             "wave": [1, 1, 2, 2],
-             "group": ["USA", "USA", "Argentina", "Argentina"],
-             "age": [25, 30, 35, 40],
+            "group": ["USA", "USA", "Argentina", "Argentina"],
+            "age": [25, 30, 35, 40],
             "gender": ["M", "F", "M", "F"],
         }
         processor.combined_data = pd.DataFrame(data)
