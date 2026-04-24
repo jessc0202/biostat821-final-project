@@ -39,10 +39,11 @@ class TestSurveyProcessor:
                 assert "start_date" in df.columns
                 assert len(df) == self.ROWS_PER_FILE
 
-    def test_process_data_groups(self):
+def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir, tempfile.TemporaryDirectory() as arg_dir:
-            for i in range(2):
+        with tempfile.TemporaryDirectory() as usa_dir:
+            with tempfile.TemporaryDirectory() as arg_dir:
+                for i in range(2):
                 data = {
                     "ResponseId": [f"usa_{j}" for j in range(2)],
                     "Demo_Age": [25 + j for j in range(2)],
