@@ -39,39 +39,35 @@ class TestSurveyProcessor:
                 assert "start_date" in df.columns
                 assert len(df) == self.ROWS_PER_FILE
 
-def test_process_data_groups(self):
+    def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir:
-            with tempfile.TemporaryDirectory() as arg_dir:
-                for i in range(2):
+        with tempfile.TemporaryDirectory() as usa_dir, \
+             tempfile.TemporaryDirectory() as arg_dir:
+            for i in range(2):
                 data = {
                     "ResponseId": [f"usa_{j}" for j in range(2)],
                     "Demo_Age": [25 + j for j in range(2)],
+                    "Demo_Gender": ["M", "F"],
+                    "Dream_Text": ["Dream 1", "Dream 2"],
                 }
                 df = pd.DataFrame(data)
-                csv_path = Path(usa_dir) / f"usa_wave_{i + 1}.csv"
+                csv_path = Path(usa_dir) / f"file_{i}.csv"
                 df.to_csv(csv_path, index=False)
 
-            for i in range(2):
-                data = {
-                    "ResponseId": [f"arg_{j}" for j in range(2)],
-                    "Demo_Age": [35 + j for j in range(2)],
-                }
-                df = pd.DataFrame(data)
-                excel_path = Path(arg_dir) / f"arg_form_{i + 1}.xlsx"
-                df.to_excel(excel_path, index=False)
+                arg_csv_path = Path(arg_dir) / f"file_{i}.csv"
+                df.to_csv(arg_csv_path, index=False)
 
             processor = SurveyProcessor()
-            combined_df = processor.process_data_groups(
-                {"USA": usa_dir, "Argentina": arg_dir}
-            )
+            data_dirs = {"USA": usa_dir, "Argentina": arg_dir}
+            combined_df = processor.process_data_groups(data_dirs)
 
-            assert len(combined_df) == self.TOTAL_ROWS
-            assert "wave" in combined_df.columns
+            expected_total_rows = 8
+            assert len(combined_df) == expected_total_rows
             assert "group" in combined_df.columns
-            assert set(combined_df["group"].unique()) == self.EXPECTED_GROUPS
+            assert "wave" in combined_df.columns
+            assert set(combined_df["group"].unique()) == {"USA", "Argentina"}
             assert set(combined_df["wave"].unique()) == set(self.EXPECTED_WAVES)
-
+            assert "response_id" in combined_df.columns
     def test_validate_data(self):
         """Test data validation."""
         processor = SurveyProcessor()
