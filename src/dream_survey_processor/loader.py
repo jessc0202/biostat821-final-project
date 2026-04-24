@@ -1,8 +1,9 @@
 """Module for loading survey data from CSV and Excel files."""
 
-import pandas as pd
 from pathlib import Path
 from typing import List, Optional, Sequence, Union
+
+import pandas as pd
 
 SUPPORTED_EXTENSIONS = {".csv", ".xlsx", ".xls"}
 

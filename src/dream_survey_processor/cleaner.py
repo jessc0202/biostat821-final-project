@@ -1,7 +1,8 @@
 """Module for cleaning survey data."""
 
-import pandas as pd
 from typing import List
+
+import pandas as pd
 
 
 def remove_duplicates(df: pd.DataFrame, subset: List[str] = None) -> pd.DataFrame:
@@ -35,7 +36,7 @@ def handle_missing_values(
 
     if strategy == "drop":
         return df.dropna(subset=columns)
-    elif strategy == "fill_mean":
+    if strategy == "fill_mean":
         for col in columns:
             if col in df.columns and pd.api.types.is_numeric_dtype(df[col]):
                 df[col] = df[col].fillna(df[col].mean())

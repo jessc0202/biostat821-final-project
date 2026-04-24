@@ -1,7 +1,8 @@
 """Module for aligning survey waves across datasets."""
 
-import pandas as pd
 from typing import Dict, List
+
+import pandas as pd
 
 
 def add_wave_column(

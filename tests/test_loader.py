@@ -1,16 +1,21 @@
 """Tests for the loader module."""
 
-import pytest
-import pandas as pd
-from pathlib import Path
-import tempfile
 import os
+import tempfile
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from dream_survey_processor.loader import load_csv, load_excel, load_survey_files
 
 
 class TestLoader:
     """Test cases for data loading functions."""
+
+    # Constants for test assertions
+    NUM_FILES = 2
+    ROWS_PER_FILE = 3
 
     def test_load_csv(self):
         """Test loading a CSV file."""
@@ -56,10 +61,10 @@ class TestLoader:
                 df.to_csv(csv_path, index=False)
 
             loaded_dfs = load_survey_files(temp_dir, extensions=[".csv"])
-            assert len(loaded_dfs) == 2
+            assert len(loaded_dfs) == self.NUM_FILES
             for df in loaded_dfs:
                 assert "ResponseId" in df.columns
-                assert len(df) == 3
+                assert len(df) == self.ROWS_PER_FILE
 
     def test_load_survey_files_excel(self):
         """Test loading survey Excel files from a directory."""
@@ -74,10 +79,10 @@ class TestLoader:
                 df.to_excel(excel_path, index=False)
 
             loaded_dfs = load_survey_files(temp_dir, extensions=[".xlsx"])
-            assert len(loaded_dfs) == 2
+            assert len(loaded_dfs) == self.NUM_FILES
             for df in loaded_dfs:
                 assert "ResponseId" in df.columns
-                assert len(df) == 3
+                assert len(df) == self.ROWS_PER_FILE
 
     def test_load_survey_files_invalid_directory(self):
         """Test loading files from a missing directory."""

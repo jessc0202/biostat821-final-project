@@ -8,6 +8,12 @@ from dream_survey_processor.aligner import add_wave_column, align_waves
 class TestAligner:
     """Test cases for data alignment functions."""
 
+    # Constants for test assertions
+    NUM_FILES = 3
+    TOTAL_ROWS = 8
+    EXPECTED_WAVES = {1, 2}
+    EXPECTED_GROUPS = {"USA", "Argentina"}
+
     def test_add_wave_column(self):
         """Test adding wave column to DataFrames."""
         dfs = [
@@ -18,7 +24,7 @@ class TestAligner:
 
         aligned_dfs = add_wave_column(dfs)
 
-        assert len(aligned_dfs) == 3
+        assert len(aligned_dfs) == self.NUM_FILES
         for i, df in enumerate(aligned_dfs):
             assert "wave" in df.columns
             assert all(df["wave"] == i + 1)
@@ -38,10 +44,10 @@ class TestAligner:
 
         combined_df = align_waves({"USA": usa_dfs, "Argentina": argentina_dfs})
 
-        assert len(combined_df) == 8
+        assert len(combined_df) == self.TOTAL_ROWS
         assert "wave" in combined_df.columns
         assert "group" in combined_df.columns
         assert "response_id" in combined_df.columns
         assert "age" in combined_df.columns
-        assert set(combined_df["wave"].unique()) == {1, 2}
-        assert set(combined_df["group"].unique()) == {"USA", "Argentina"}
+        assert set(combined_df["wave"].unique()) == self.EXPECTED_WAVES
+        assert set(combined_df["group"].unique()) == self.EXPECTED_GROUPS

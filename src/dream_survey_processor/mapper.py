@@ -1,8 +1,8 @@
 """Module for mapping different survey schemas to a unified format."""
 
-import pandas as pd
 from typing import Dict, List, Optional
 
+import pandas as pd
 
 DEFAULT_COLUMN_MAPPING: Dict[str, List[str]] = {
     "response_id": ["ResponseId", "Response ID", "response_id"],

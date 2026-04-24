@@ -1,8 +1,9 @@
 """Main processor for survey data pipeline."""
 
-import pandas as pd
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
+
+import pandas as pd
 
 from .aligner import align_waves
 from .cleaner import handle_missing_values, remove_duplicates

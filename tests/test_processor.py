@@ -1,16 +1,25 @@
 """Tests for the processor module."""
 
-import pytest
-import pandas as pd
-from pathlib import Path
 import tempfile
-import os
+from pathlib import Path
+
+import pandas as pd
+import pytest
 
 from dream_survey_processor.processor import SurveyProcessor
 
 
 class TestSurveyProcessor:
     """Test cases for the SurveyProcessor class."""
+
+    # Constants for test assertions
+    NUM_FILES = 2
+    ROWS_PER_FILE = 2
+    TOTAL_ROWS = 8
+    EXPECTED_ROWS = 4
+    EXPECTED_COLUMNS = 5
+    EXPECTED_WAVES = [1, 2]
+    EXPECTED_GROUPS = {"USA", "Argentina"}
 
     def test_process_directory(self):
         """Test processing a single labeled directory."""
@@ -28,12 +37,12 @@ class TestSurveyProcessor:
             processor = SurveyProcessor()
             processed_dfs = processor.process_directory(temp_dir, "group")
 
-            assert len(processed_dfs) == 2
+            assert len(processed_dfs) == self.NUM_FILES
             for df in processed_dfs:
                 assert "response_id" in df.columns
                 assert "age" in df.columns
                 assert "start_date" in df.columns
-                assert len(df) == 2
+                assert len(df) == self.ROWS_PER_FILE
 
     def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
@@ -61,11 +70,11 @@ class TestSurveyProcessor:
                 {"USA": usa_dir, "Argentina": arg_dir}
             )
 
-            assert len(combined_df) == 8
+            assert len(combined_df) == self.TOTAL_ROWS
             assert "wave" in combined_df.columns
             assert "group" in combined_df.columns
-            assert set(combined_df["group"].unique()) == {"USA", "Argentina"}
-            assert set(combined_df["wave"].unique()) == {1, 2}
+            assert set(combined_df["group"].unique()) == self.EXPECTED_GROUPS
+            assert set(combined_df["wave"].unique()) == set(self.EXPECTED_WAVES)
 
     def test_validate_data(self):
         """Test data validation."""
@@ -105,10 +114,10 @@ class TestSurveyProcessor:
 
         summary = processor.get_summary()
 
-        assert summary["total_rows"] == 4
-        assert summary["total_columns"] == 5
-        assert summary["waves"] == [1, 2]
-        assert set(summary["groups"]) == {"USA", "Argentina"}
+        assert summary["total_rows"] == self.EXPECTED_ROWS
+        assert summary["total_columns"] == self.EXPECTED_COLUMNS
+        assert summary["waves"] == self.EXPECTED_WAVES
+        assert set(summary["groups"]) == self.EXPECTED_GROUPS
         assert "response_id" in summary["columns"]
 
     def test_get_summary_no_data(self):
