@@ -54,7 +54,7 @@ class TestSurveyProcessor:
                     "Dream_Text": ["Dream 1", "Dream 2"],
                 }
                 df = pd.DataFrame(data)
-                
+
                 df.to_csv(Path(usa_dir) / f"file_{i}.csv", index=False)
                 df.to_csv(Path(arg_dir) / f"file_{i}.csv", index=False)
 
@@ -103,7 +103,7 @@ class TestSurveyProcessor:
              "group": ["USA", "USA", "Argentina", "Argentina"],
              "age": [25, 30, 35, 40],
             "gender": ["M", "F", "M", "F"],
-        } 
+        }
         processor.combined_data = pd.DataFrame(data)
 
         summary = processor.get_summary()
