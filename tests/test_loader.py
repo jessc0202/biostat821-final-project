@@ -1,4 +1,5 @@
 """Tests for the loader module."""
+
 import tempfile
 from pathlib import Path
 

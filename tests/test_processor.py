@@ -41,8 +41,7 @@ class TestSurveyProcessor:
 
     def test_process_data_groups(self):
         """Test processing and combining multiple labeled directories."""
-        with tempfile.TemporaryDirectory() as usa_dir, \
-             tempfile.TemporaryDirectory() as arg_dir:
+        with tempfile.TemporaryDirectory() as usa_dir, tempfile.TemporaryDirectory() as arg_dir:
             for i in range(2):
                 data = {
                     "ResponseId": [f"usa_{j}" for j in range(2)],
