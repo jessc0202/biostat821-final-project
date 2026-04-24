@@ -56,4 +56,4 @@ class TestMapper:
         assert pd.api.types.is_numeric_dtype(standardized_df["age"])
         assert pd.api.types.is_numeric_dtype(standardized_df["duration"])
         assert pd.api.types.is_datetime64_any_dtype(standardized_df["start_date"])
-        assert standardized_df["text_col"].dtype == object
+        assert pd.api.types.is_string_dtype(standardized_df["text_col"])
