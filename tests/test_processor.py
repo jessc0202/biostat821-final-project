@@ -44,11 +44,11 @@ class TestSurveyProcessor:
             with tempfile.TemporaryDirectory() as arg_dir:
                 for i in range(2):
                     data = {
-                         "ResponseId": [f"usa_{j}" for j in range(2)],
+                        "ResponseId": [f"usa_{j}" for j in range(2)],
                         "Demo_Age": [25 + j for j in range(2)],
                         "Demo_Gender": ["M", "F"],
                         "Dream_Text": ["Dream 1", "Dream 2"],
-                        }
+                    }
                     df = pd.DataFrame(data)
                     csv_path = Path(usa_dir) / f"file_{i}.csv"
                     df.to_csv(csv_path, index=False)
